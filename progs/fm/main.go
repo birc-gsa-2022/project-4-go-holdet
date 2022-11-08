@@ -23,8 +23,9 @@ func main() {
 		p_genomes := shared.GeneralParser(genome, shared.Fasta)
 		for _, gen := range p_genomes {
 			sa := shared.LsdRadixSort(gen.Rec)
-			bwtx, buckets, o := shared.BWTPreprocessing(sa, gen.Rec)
-			shared.FMIndexMatching(bwtx, buckets, o)
+			bwt, c, o := shared.FM_build(sa, gen.Rec)
+			fmt.Println(bwt, c, o)
+			//shared.FMIndexMatching(bwtx, buckets, o)
 		}
 		fmt.Println(shared.TodoPreprocess(os.Args[2]))
 	} else {

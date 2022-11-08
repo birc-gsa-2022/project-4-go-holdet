@@ -12,9 +12,6 @@ func Test_Output(t *testing.T) {
 	genome, read := "akasakan$", "aka"
 
 	sa := shared.LsdRadixSort(genome)
-	bwtx, buckets, o := shared.BWTPreprocessing(sa, genome)
-	shared.FMIndexMatching(bwtx, buckets, o)
-	return
 	fmt.Println(sa)
 	for i, idx := range sa {
 		fmt.Println(i, genome[idx:])
@@ -81,6 +78,19 @@ func TestVaryingAlphabets(t *testing.T) {
 
 	}
 	fmt.Println("a total of", matches, " matches was found in the test.")
+}
+
+func TestBWT(t *testing.T) {
+	genome, pattern := "mississippi$", "iss"
+
+	//todo test at o table er rigtigt ved at lave kalde vores bucket metode fra sidst og sammenligne med indholdet i den her fister.
+	sa := shared.LsdRadixSort(genome)
+	bwt, c, o := shared.FM_build(sa, genome)
+	fmt.Println(bwt, c, o)
+	//shared.FMIndexMatching(bwtx, buckets, o)
+	fmt.Println("bongo")
+	shared.FM_search(bwt, c, o, pattern)
+
 }
 
 /*
