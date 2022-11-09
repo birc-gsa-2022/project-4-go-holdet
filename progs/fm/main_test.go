@@ -83,7 +83,6 @@ func TestVaryingAlphabets(t *testing.T) {
 func TestBWT(t *testing.T) {
 	genome, pattern := "mississippi$", "iss"
 
-	//todo test at o table er rigtigt ved at lave kalde vores bucket metode fra sidst og sammenligne med indholdet i den her fister.
 	sa := shared.LsdRadixSort(genome)
 	bwt, c, o := shared.FM_build(sa, genome)
 	fmt.Println(bwt, c, o)
@@ -91,6 +90,28 @@ func TestBWT(t *testing.T) {
 	fmt.Println("bongo")
 	shared.FM_search(bwt, c, o, pattern)
 
+}
+
+func TestOTable(t *testing.T) {
+	genome := `missijnsooofsjkfndsjkfndsjkhmkdslfjsdlfksdalkfjdsfloooooo 
+			   sooooookndsjfndsjkfopopopopoooooooppppooooooooooossippids
+			   oooooookndsjfndsjkfopopggopoooasdappppooooooooooossippis$`
+	sa := shared.LsdRadixSort(genome)
+	bwt, _, o := shared.FM_build(sa, genome)
+
+	for i := 0; i <= len(genome); i++ {
+		counts := make(map[byte]int)
+		for _, v := range []byte(bwt[:i]) {
+			counts[v]++
+
+		}
+		for k, v := range counts {
+			if o[i][k] != v {
+				t.Errorf("O table error")
+			}
+		}
+
+	}
 }
 
 /*
