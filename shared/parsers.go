@@ -115,3 +115,54 @@ func GeneralParserStub(file string, format Format, maxCapacity int) []Recs {
 
 	return recs
 }
+
+type FMRecs struct {
+	Name string
+	Bwt  []byte
+	O    []map[int]byte
+	C    map[byte]int
+}
+
+func FMParser(file *os.File) []FMRecs {
+
+	recs := make([]FMRecs, 0)
+	fileScanner := bufio.NewScanner(file)
+	C := make(map[byte]int)
+	activeRec := new(FMRecs)
+
+	for fileScanner.Scan() {
+		line := fileScanner.Text()
+
+		if len(line) == 0 {
+			continue
+		}
+
+		if line[0] == '>' {
+			//avoid getting empty genomes (edgecase)
+			if len(activeRec.Bwt) != 0 {
+				activeRec.C = C
+				recs = append(recs, *activeRec)
+
+			}
+			C = make(map[byte]int)
+
+			activeRec = new(FMRecs)
+			activeRec.Name = string(line[1:])
+		}
+		if line[0] == '@' {
+
+			bwt := []byte(line)
+			activeRec.Bwt = bwt
+
+		}
+		if line[0] == '*' {
+			val, er := strconv.Atoi(line[2:])
+			if er != nil {
+				panic(er)
+			}
+
+			C[line[1]] = val
+		}
+	}
+	return recs
+}

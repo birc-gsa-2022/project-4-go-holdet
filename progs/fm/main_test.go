@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"birc.au.dk/gsa/shared"
@@ -80,24 +81,22 @@ func TestVaryingAlphabets(t *testing.T) {
 	fmt.Println("a total of", matches, " matches was found in the test.")
 }
 
-func TestBWT(t *testing.T) {
+/*func TestBWT(t *testing.T) {
 	genome, pattern := "mississippi$", "iss"
 
 	sa := shared.LsdRadixSort(genome)
-	bwt, c, o := shared.FM_build(sa, genome)
-	fmt.Println(bwt, c, o)
+	bwt, c := shared.FM_build(sa, genome)
+	fmt.Println(bwt, c)
 	//shared.FMIndexMatching(bwtx, buckets, o)
 	fmt.Println("bongo")
-	shared.FM_search(bwt, c, o, pattern)
+	shared.FM_search(bwt, c, _, pattern)
 
-}
+}*/
 
 func TestOTable(t *testing.T) {
-	genome := `missijnsooofsjkfndsjkfndsjkhmkdslfjsdlfksdalkfjdsfloooooo 
-			   sooooookndsjfndsjkfopopopopoooooooppppooooooooooossippids
-			   oooooookndsjfndsjkfopopggopoooasdappppooooooooooossippis$`
+	genome := `dagagagaaa$`
 	sa := shared.LsdRadixSort(genome)
-	bwt, _, o := shared.FM_build(sa, genome)
+	bwt, _ := shared.FM_build(sa, genome)
 
 	for i := 0; i <= len(genome); i++ {
 		counts := make(map[byte]int)
@@ -105,6 +104,7 @@ func TestOTable(t *testing.T) {
 			counts[v]++
 
 		}
+		o := shared.BuildOtable(bwt)
 		for k, v := range counts {
 			if o[i][k] != v {
 				t.Errorf("O table error")
@@ -112,6 +112,18 @@ func TestOTable(t *testing.T) {
 		}
 
 	}
+}
+
+func TestFMParser(t *testing.T) {
+
+	f, er := os.Open("data/pre.fm")
+	if er != nil {
+		panic(er)
+	}
+	pr_genomes := shared.FMParser(f)
+
+	fmt.Println(pr_genomes[0].Bwt, pr_genomes[0].C, pr_genomes[0].Name)
+
 }
 
 /*

@@ -22,13 +22,33 @@ func getSortedKeysOfCountSlice(counts map[byte]int) []byte {
 	return keys
 }
 
+func BuildOtable(bwt []byte) []map[byte]int {
+	o := make([]map[byte]int, len(bwt)+1)
+	counts := make(map[byte]int)
+	copyOfCounts := make(map[byte]int)
+
+	o[0] = copyOfCounts
+
+	for i, v := range bwt {
+		fmt.Println(o[0])
+		copyOfCounts := make(map[byte]int)
+
+		counts[v] += 1
+		for key, value := range counts {
+			copyOfCounts[key] = value
+		}
+
+		o[i+1] = copyOfCounts
+	}
+	return o
+}
+
 // Data might need to represented differently
-func FM_build(sa []int, genome string) ([]byte, map[byte]int, []map[byte]int) {
+func FM_build(sa []int, genome string) ([]byte, map[byte]int) {
 
 	bwt := make([]byte, len(sa))
 	counts := make(map[byte]int)
 	c := make(map[byte]int)
-	o := make([]map[byte]int, len(sa)+1)
 	activeSymbol := genome[len(genome)-1]
 	counter := 0
 
@@ -38,7 +58,6 @@ func FM_build(sa []int, genome string) ([]byte, map[byte]int, []map[byte]int) {
 		for key, value := range counts {
 			copyOfCounts[key] = value
 		}
-		o[i] = copyOfCounts
 
 		//add current letter to o table
 		if v == 0 {
@@ -52,10 +71,7 @@ func FM_build(sa []int, genome string) ([]byte, map[byte]int, []map[byte]int) {
 			c[genome[v]] = counter
 			activeSymbol = genome[v]
 		}
-		counter++
 	}
-	//last idx with all values
-	o[len(sa)] = counts
 
 	//create buckets
 	keys := getSortedKeysOfCountSlice(counts)
@@ -67,7 +83,7 @@ func FM_build(sa []int, genome string) ([]byte, map[byte]int, []map[byte]int) {
 
 	fmt.Println(c)
 	fmt.Println("")
-	return bwt, c, o
+	return bwt, c
 }
 
 //locate interval for pattern p

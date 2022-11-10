@@ -40,8 +40,8 @@ func main() {
 
 			fmt.Println(len(gen.Rec), gen.Rec)
 			sa := shared.LsdRadixSort(gen.Rec)
-			bwt, c, o := shared.FM_build(sa, gen.Rec)
-			fmt.Println(bwt, c, o)
+			bwt, c := shared.FM_build(sa, gen.Rec)
+			fmt.Println(bwt, c)
 
 			//write to file
 			f.WriteString(">" + gen.Name + "\n")
@@ -50,7 +50,7 @@ func main() {
 			f.WriteString("\n")
 
 			for k, v := range c {
-				f.WriteString(string(k) + " " + fmt.Sprint(v))
+				f.WriteString("*" + string(k) + fmt.Sprint(v))
 				f.WriteString("\n")
 			}
 
