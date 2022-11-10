@@ -1,0 +1,67 @@
+>chrom0
+@acgtacgcccccgca$tctatcgaa
+a 1
+c 7
+g 17
+t 21
+>chrom1
+@gttaaggaaccccggggaagggggggccttccccaaaaaagttg$aa
+a 1
+c 15
+g 25
+t 41
+>chrom2
+@a$
+a 1
+>chromMumse
+@??gggtaaat$yuzyyizs
+u 13
+a 3
+g 6
+t 11
+y 14
+z 17
+? 1
+i 9
+s 10
+>chrom88
+@mssmsspssspsssspssssmmmmpii$pipppsiisiisipppssisssisipsispsiipiiiiisiiii
+m 24
+p 30
+s 44
+i 1
+>chrom101
+@bbbbabaaaabbbbbabbbxaxbabbbccbbbbbbbbbbbbaabbbbbbbcbbba$aaaaaaaacabaaabxacaaaaaaaaaaaaaaaaxaabaaabbaaaaabacacbbbxbxxb
+a 1
+b 53
+c 103
+x 110
+>chrom102
+@bbbabbbabbbbbbbbbabbabababba$abaaaabaabaabababba
+a 1
+b 20
+>chrom103
+@abbbbbbbbbbabb$abbbaubabbakiaaaaababaaakyyteaeetaa
+u 47
+y 48
+a 1
+b 19
+e 39
+i 42
+k 43
+t 45
+>chrom104
+@abbbbbbbbaaaebbaaeabeyeabbsaabeyaaaubbkkbbbkkknnnnrre$aoooommmmueiubtbee
+e 36
+k 46
+m 51
+o 59
+r 63
+s 65
+t 66
+a 1
+u 67
+i 45
+n 55
+y 70
+b 15

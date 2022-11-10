@@ -24,14 +24,15 @@ func getSortedKeysOfCountSlice(counts map[byte]int) []byte {
 
 // Data might need to represented differently
 func FM_build(sa []int, genome string) ([]byte, map[byte]int, []map[byte]int) {
+
 	bwt := make([]byte, len(sa))
 	counts := make(map[byte]int)
 	c := make(map[byte]int)
 	o := make([]map[byte]int, len(sa)+1)
-	fmt.Println(len(sa))
-	fmt.Println(len(o))
+	activeSymbol := genome[len(genome)-1]
+	counter := 0
+
 	for i, v := range sa {
-		fmt.Println(i)
 		copyOfCounts := make(map[byte]int)
 		// Copy from the original map to the target map
 		for key, value := range counts {
@@ -46,6 +47,12 @@ func FM_build(sa []int, genome string) ([]byte, map[byte]int, []map[byte]int) {
 			bwt[i] = genome[v-1]
 		}
 		counts[bwt[i]] += 1
+
+		if activeSymbol != genome[v] {
+			c[genome[v]] = counter
+			activeSymbol = genome[v]
+		}
+		counter++
 	}
 	//last idx with all values
 	o[len(sa)] = counts
@@ -58,6 +65,8 @@ func FM_build(sa []int, genome string) ([]byte, map[byte]int, []map[byte]int) {
 		}
 	}
 
+	fmt.Println(c)
+	fmt.Println("")
 	return bwt, c, o
 }
 
