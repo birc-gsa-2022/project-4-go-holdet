@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"testing"
 
 	"birc.au.dk/gsa/shared"
@@ -114,6 +113,7 @@ func TestOTable(t *testing.T) {
 	}
 }
 
+/*
 func TestFMParser(t *testing.T) {
 
 	f, er := os.Open("data/pre.fm")
@@ -125,6 +125,7 @@ func TestFMParser(t *testing.T) {
 	fmt.Println(pr_genomes[0].Bwt, pr_genomes[0].C, pr_genomes[0].Name)
 
 }
+*/
 
 /*
 func Test_cmp_with_old_handin(t *testing.T) {
