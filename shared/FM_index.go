@@ -9,7 +9,7 @@ import (
 ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ REPRESENT BUCKETS TO AVOID
 ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ n log n SEARCH*/
 func getSortedKeysOfCountSlice(counts map[byte]int) []byte {
-	keys := make([]byte, len(counts))
+	keys := make([]byte, 256)
 	i := 0
 	for key := range counts {
 		keys[i] = key

@@ -27,7 +27,9 @@ Once you have implemented the `fm` program (and tested it to the best of your ab
 
 ## Validation
 
-*How did you validate that the preprocessing and the search algorithm works?*
+We ran the our fm algorithm and an old algorithm (from handin 2) on the some dataset with a couple of hundreds identical outputs. We then sorted the two results and compared them. 
+Then in order to find edgecases we also tested the algorithm on some smaller simple genomes/reads speically constructed.
+Finally we made our usual test where we run the algorithm on random strings from some different alphabets (DNA, AB, English) and verify that all reported matches are matches, and all other instances are not matches.
 
 ## Running time
 

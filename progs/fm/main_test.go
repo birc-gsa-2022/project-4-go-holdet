@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strings"
 	"testing"
 
 	"birc.au.dk/gsa/shared"
@@ -43,39 +45,79 @@ func TestVaryingAlphabets(t *testing.T) {
 		shared.English, shared.DNA, shared.AB}
 
 	for _, v := range Alphabets {
-		genome, reads := shared.BuildSomeFastaAndFastq(300, 8, 20, v, 11)
-
+		genome, reads := shared.BuildSomeFastaAndFastq(50, 5, 20, v, 11)
 		parsedGenomes := shared.GeneralParserStub(genome, shared.Fasta, len(genome)+1)
+
+		//do preprocessing - write read file
+		f, err := os.Create("./test.bongo")
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+
+		var sa []int
+		for _, gen := range parsedGenomes {
+			var sb strings.Builder
+			//add sentinel if missing
+			if gen.Rec[len(gen.Rec)-1] != '$' {
+				sb.WriteString(gen.Rec)
+				sb.WriteRune('$')
+				gen.Rec = sb.String()
+			}
+			sa = shared.LsdRadixSort(gen.Rec)
+			bwt, c := shared.FM_build(sa, gen.Rec)
+			//write to file
+			f.WriteString(">" + gen.Name + "\n")
+			f.WriteString("@")
+			f.Write(bwt)
+			f.WriteString("\n")
+			for k, v := range c {
+				f.WriteString("*" + string(k) + fmt.Sprint(v))
+				f.WriteString("\n")
+			}
+
+		}
+		f, err = os.Open("./test.bongo")
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+		FMParsedGenomes := shared.FMParser(f)
 		parsedReads := shared.GeneralParserStub(reads, shared.Fastq, len(reads)+1)
 
 		//iterate all genomes
-		for _, gen := range parsedGenomes {
-			sa := shared.LsdRadixSort(gen.Rec)
+		for i, gen := range FMParsedGenomes {
 			//iterate all reads
 			for _, read := range parsedReads {
-				lower, upper := shared.BinarySearch(gen.Rec, read.Rec, sa)
-				matches += upper - lower
+				start, end := shared.FM_search(gen.Bwt, gen.C, gen.O, read.Rec)
+				if start != end {
+					matches += end - start
+					//find matches
+					if len(gen.BS) == 0 {
+						//this is only computed if needed
+						gen.BS = shared.ReverseBWT(gen.Bwt, gen.C, gen.O)
+					}
 
-				//verify that the bounds are correct
-				for _, v := range sa {
-					idx := sa[v]
-
-					//check if all suffixes in the interval matches and that all suffixes outside do not match.
-					if v >= lower && v < upper {
-						if gen.Rec[idx:len(read.Rec)+idx] != read.Rec {
-							t.Error("They ARE NOT identical. But should be at idx:", v)
-						}
-					} else {
-						if sa[v]+len(read.Rec) < len(gen.Rec) {
-							if gen.Rec[idx:len(read.Rec)+idx] == read.Rec {
-								t.Error("They ARE identical. But should be at idx:", v)
+					//verify that the bounds are correct
+					for _, v := range gen.BS {
+						idx := gen.BS[v]
+						//check if all suffixes in the interval matches and that all suffixes outside do not match.
+						if v >= start && v < end {
+							if parsedGenomes[i].Rec[idx:len(read.Rec)+idx] != read.Rec {
+								t.Error("They ARE NOT identical. But should be at idx:", v)
+							}
+						} else {
+							if gen.BS[v]+len(read.Rec) < len(parsedGenomes[i].Rec) {
+								if parsedGenomes[i].Rec[idx:len(read.Rec)+idx] == read.Rec {
+									t.Error("They ARE identical. But should be at idx:", v)
+								}
 							}
 						}
 					}
 				}
 			}
-		}
 
+		}
 	}
 	fmt.Println("a total of", matches, " matches was found in the test.")
 }

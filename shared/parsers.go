@@ -133,7 +133,6 @@ func FMParser(file *os.File) []FMRecs {
 
 	for fileScanner.Scan() {
 		line := fileScanner.Text()
-
 		if len(line) == 0 {
 			continue
 		}
