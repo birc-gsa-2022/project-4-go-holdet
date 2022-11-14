@@ -20,7 +20,7 @@ func main() {
 
 	if os.Args[1] == "-p" {
 		//create file to store preprocessing (data/pre.fa)
-		f, err := os.Create("./data/pre.fm")
+		f, err := os.Open(os.Args[2])
 		if err != nil {
 			panic(err)
 		}
@@ -29,6 +29,13 @@ func main() {
 		// preprocess
 		genome := os.Args[2]
 		p_genomes := shared.GeneralParser(genome, shared.Fasta)
+
+		f, err = os.Create(os.Args[2])
+		if err != nil {
+			panic(err)
+		}
+		defer f.Close()
+
 		for _, gen := range p_genomes {
 			var sb strings.Builder
 			//add sentinel if missing
@@ -55,10 +62,9 @@ func main() {
 		//fmt.Println(shared.TodoMap(os.Args[1], os.Args[2]))
 
 		//perform exact pattern matching on already precomputed data
-		//genome := os.Args[1]
 		reads := os.Args[2]
 
-		file, err := os.Open("data/pre.fm")
+		file, err := os.Open(os.Args[1])
 		if err != nil {
 			panic(err)
 		}
