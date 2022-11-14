@@ -96,7 +96,6 @@ func FM_search(bwt []byte, C map[byte]int, O []map[byte]int, p string) (int, int
 		L = C[a] + O[L][a]
 		R = C[a] + O[R][a]
 	}
-
 	return L, R
 }
 
@@ -117,13 +116,12 @@ func ReverseBWT(bwt []byte, C map[byte]int, O []map[byte]int) []int {
 	bwt_idx := st
 	bar_idx := 0
 	//reversing transformation
-	for rot := len(bwt); rot > 0; rot-- {
+	for rot := len(bwt); rot >= 0; rot-- {
 		letter := bwt[bwt_idx]
 		bar_idx = C[letter] + O[bwt_idx][letter]
 		rev[bwt_idx] = rot
 		bwt_idx = bar_idx
 	}
-
 	return rev
 }
 
