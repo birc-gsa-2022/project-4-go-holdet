@@ -25,7 +25,7 @@ func main() {
 		genome := os.Args[2]
 		p_genomes := shared.GeneralParser(genome, shared.Fasta)
 
-		f, err := os.Create("./pre.fm")
+		f, err := os.Create(os.Args[2])
 		if err != nil {
 			panic(err)
 		}
@@ -59,7 +59,7 @@ func main() {
 		//perform exact pattern matching on already precomputed data
 		reads := os.Args[2]
 
-		file, err := os.Open("./pre.fm")
+		file, err := os.Open(os.Args[1])
 		if err != nil {
 			panic(err)
 		}
