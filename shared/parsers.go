@@ -117,10 +117,11 @@ func GeneralParserStub(file string, format Format, maxCapacity int) []Recs {
 }
 
 type FMRecs struct {
-	Name string
-	Bwt  []byte
-	O    []map[int]byte
-	C    map[byte]int
+	Name      string
+	Bwt       []byte
+	O         []map[byte]int
+	C         map[byte]int
+	Bwt_to_sa []int
 }
 
 func FMParser(file *os.File) []FMRecs {
@@ -141,7 +142,9 @@ func FMParser(file *os.File) []FMRecs {
 			//avoid getting empty genomes (edgecase)
 			if len(activeRec.Bwt) != 0 {
 				activeRec.C = C
+				activeRec.O = BuildOtable(activeRec.Bwt)
 				recs = append(recs, *activeRec)
+				activeRec.Bwt_to_sa = ReverseBWT(activeRec.Bwt, C, activeRec.O)
 
 			}
 			C = make(map[byte]int)
@@ -163,6 +166,14 @@ func FMParser(file *os.File) []FMRecs {
 
 			C[line[1]] = val
 		}
+	}
+	//remember to add last element
+	if len(activeRec.Bwt) != 0 {
+		activeRec.C = C
+		activeRec.O = BuildOtable(activeRec.Bwt)
+		recs = append(recs, *activeRec)
+		activeRec.Bwt_to_sa = ReverseBWT(activeRec.Bwt, C, activeRec.O)
+
 	}
 	return recs
 }

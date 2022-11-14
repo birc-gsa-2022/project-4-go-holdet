@@ -38,10 +38,8 @@ func main() {
 				gen.Rec = sb.String()
 			}
 
-			fmt.Println(len(gen.Rec), gen.Rec)
 			sa := shared.LsdRadixSort(gen.Rec)
 			bwt, c := shared.FM_build(sa, gen.Rec)
-			fmt.Println(bwt, c)
 
 			//write to file
 			f.WriteString(">" + gen.Name + "\n")
@@ -60,30 +58,32 @@ func main() {
 		fmt.Println(shared.TodoMap(os.Args[1], os.Args[2]))
 
 		//perform exact pattern matching on already precomputed data
-		genome := os.Args[1]
+		//genome := os.Args[1]
 		reads := os.Args[2]
 
-		p_genomes := shared.GeneralParser(genome, shared.Fasta)
+		file, err := os.Open("data/pre.fm")
+		if err != nil {
+			panic(err)
+		}
+		p_genomes := shared.FMParser(file)
+
 		p_reads := shared.GeneralParser(reads, shared.Fastq)
 
-		/*
-			fo, err := os.Create("./testdata/output.txt")
-			if err != nil {
-				panic(err)
-			}*/
+		fo, err := os.Create("./data/output.txt")
+		if err != nil {
+			panic(err)
+		}
 
 		for _, gen := range p_genomes {
-			sa := shared.LsdRadixSort(gen.Rec)
-			fmt.Println(sa)
-
 			for _, read := range p_reads {
-				start, end := shared.BinarySearch(gen.Rec, read.Rec, sa)
+				start, end := shared.FM_search(gen.Bwt, gen.C, gen.O, read.Rec)
 				for i := start; i < end; i++ {
-					shared.Sam(read.Name, gen.Name, sa[i], read.Rec)
-					/*
-						res := shared.SamStub(read.Name, gen.Name, sa[i], read.Rec)
-						fo.Write([]byte(res))
-					*/
+
+					shared.Sam(read.Name, gen.Name, gen.Bwt_to_sa[i], read.Rec)
+
+					res := shared.SamStub(read.Name, gen.Name, i, read.Rec)
+					fo.Write([]byte(res))
+
 				}
 			}
 

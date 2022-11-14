@@ -30,7 +30,6 @@ func BuildOtable(bwt []byte) []map[byte]int {
 	o[0] = copyOfCounts
 
 	for i, v := range bwt {
-		fmt.Println(o[0])
 		copyOfCounts := make(map[byte]int)
 
 		counts[v] += 1
@@ -48,7 +47,7 @@ func FM_build(sa []int, genome string) ([]byte, map[byte]int) {
 
 	bwt := make([]byte, len(sa))
 	counts := make(map[byte]int)
-	c := make(map[byte]int)
+	C := make(map[byte]int)
 	activeSymbol := genome[len(genome)-1]
 	counter := 0
 
@@ -68,7 +67,7 @@ func FM_build(sa []int, genome string) ([]byte, map[byte]int) {
 		counts[bwt[i]] += 1
 
 		if activeSymbol != genome[v] {
-			c[genome[v]] = counter
+			C[genome[v]] = counter
 			activeSymbol = genome[v]
 		}
 	}
@@ -77,17 +76,15 @@ func FM_build(sa []int, genome string) ([]byte, map[byte]int) {
 	keys := getSortedKeysOfCountSlice(counts)
 	for i, v := range keys {
 		if i != 0 {
-			c[v] = counts[keys[i-1]] + c[keys[i-1]]
+			C[v] = counts[keys[i-1]] + C[keys[i-1]]
 		}
 	}
 
-	fmt.Println(c)
-	fmt.Println("")
-	return bwt, c
+	return bwt, C
 }
 
 //locate interval for pattern p
-func FM_search(bwt []byte, c map[byte]int, o []map[byte]int, p string) (int, int) {
+func FM_search(bwt []byte, C map[byte]int, O []map[byte]int, p string) (int, int) {
 	L := 0
 	R := len(bwt) - 1
 
@@ -98,15 +95,43 @@ func FM_search(bwt []byte, c map[byte]int, o []map[byte]int, p string) (int, int
 
 		a := p[i]
 
-		L = c[a] + o[L][a]
-		R = c[a] + o[R][a]
-		fmt.Println(L, R)
+		L = C[a] + O[L][a]
+		R = C[a] + O[R][a]
 	}
 
 	for i := len(p) - 1; i > 0; i-- {
 
 	}
 	return L, R
+}
+
+func ReverseBWT(bwt []byte, C map[byte]int, O []map[byte]int) []int {
+	//remember O is the same as rank
+
+	rev := make([]int, len(bwt))
+
+	st := -1
+	//find sentinel
+	for i, v := range bwt {
+		if v == '$' {
+			st = i
+			break
+		}
+	}
+
+	bwt_idx := st
+	bar_idx := 0
+	//reversing transformation
+	for rot := 0; rot < len(bwt); rot++ {
+		letter := bwt[bwt_idx]
+		bar_idx = C[letter] + O[bwt_idx][letter]
+		rev[bwt_idx] = bar_idx
+		bwt_idx = bar_idx
+	}
+
+	fmt.Println(rev)
+
+	return rev
 }
 
 /*
