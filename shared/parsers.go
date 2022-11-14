@@ -117,11 +117,11 @@ func GeneralParserStub(file string, format Format, maxCapacity int) []Recs {
 }
 
 type FMRecs struct {
-	Name      string
-	Bwt       []byte
-	O         []map[byte]int
-	C         map[byte]int
-	Bwt_to_sa []int
+	Name string
+	Bwt  []byte
+	BS   []int
+	O    []map[byte]int
+	C    map[byte]int
 }
 
 func FMParser(file *os.File) []FMRecs {
@@ -144,7 +144,6 @@ func FMParser(file *os.File) []FMRecs {
 				activeRec.C = C
 				activeRec.O = BuildOtable(activeRec.Bwt)
 				recs = append(recs, *activeRec)
-				activeRec.Bwt_to_sa = ReverseBWT(activeRec.Bwt, C, activeRec.O)
 
 			}
 			C = make(map[byte]int)
@@ -153,8 +152,8 @@ func FMParser(file *os.File) []FMRecs {
 			activeRec.Name = string(line[1:])
 		}
 		if line[0] == '@' {
-
-			bwt := []byte(line)
+			//remember to cut off @ symbol
+			bwt := []byte(line[1:])
 			activeRec.Bwt = bwt
 
 		}
@@ -172,8 +171,8 @@ func FMParser(file *os.File) []FMRecs {
 		activeRec.C = C
 		activeRec.O = BuildOtable(activeRec.Bwt)
 		recs = append(recs, *activeRec)
-		activeRec.Bwt_to_sa = ReverseBWT(activeRec.Bwt, C, activeRec.O)
 
 	}
+
 	return recs
 }

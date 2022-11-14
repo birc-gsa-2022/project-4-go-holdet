@@ -1,7 +1,6 @@
 package shared
 
 import (
-	"fmt"
 	"sort"
 )
 
@@ -44,7 +43,6 @@ func BuildOtable(bwt []byte) []map[byte]int {
 
 // Data might need to represented differently
 func FM_build(sa []int, genome string) ([]byte, map[byte]int) {
-
 	bwt := make([]byte, len(sa))
 	counts := make(map[byte]int)
 	C := make(map[byte]int)
@@ -86,7 +84,7 @@ func FM_build(sa []int, genome string) ([]byte, map[byte]int) {
 //locate interval for pattern p
 func FM_search(bwt []byte, C map[byte]int, O []map[byte]int, p string) (int, int) {
 	L := 0
-	R := len(bwt) - 1
+	R := len(bwt)
 
 	for i := len(p) - 1; i >= 0; i-- {
 		if L == R {
@@ -99,9 +97,6 @@ func FM_search(bwt []byte, C map[byte]int, O []map[byte]int, p string) (int, int
 		R = C[a] + O[R][a]
 	}
 
-	for i := len(p) - 1; i > 0; i-- {
-
-	}
 	return L, R
 }
 
@@ -122,14 +117,12 @@ func ReverseBWT(bwt []byte, C map[byte]int, O []map[byte]int) []int {
 	bwt_idx := st
 	bar_idx := 0
 	//reversing transformation
-	for rot := 0; rot < len(bwt); rot++ {
+	for rot := len(bwt); rot > 0; rot-- {
 		letter := bwt[bwt_idx]
 		bar_idx = C[letter] + O[bwt_idx][letter]
-		rev[bwt_idx] = bar_idx
+		rev[bwt_idx] = rot
 		bwt_idx = bar_idx
 	}
-
-	fmt.Println(rev)
 
 	return rev
 }
