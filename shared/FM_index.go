@@ -1,26 +1,21 @@
 package shared
 
-import (
-	"sort"
-)
-
-/*¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ THIS IS PROBABLY NOT IDEAL....
-¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ SHOULD PERHAPS USE BYTE TO
-¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ REPRESENT BUCKETS TO AVOID
-¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ n log n SEARCH*/
-func getSortedKeysOfCountSlice(counts map[byte]int) []byte {
-	keys := make([]byte, 256)
-	i := 0
-	for key := range counts {
-		keys[i] = key
-		i++
+func getSortedKeysOfCountSlice(counts map[byte]int) map[byte]int {
+	keys := make([]int, 256)
+	C := make(map[byte]int)
+	for i, k := range counts {
+		keys[i] += k
 	}
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i] < keys[j]
-	})
-	return keys
-}
+	tot := 0
+	for i, v := range keys {
+		if v != 0 {
 
+			C[byte(i)] = tot
+			tot += v
+		}
+	}
+	return C
+}
 func BuildOtable(bwt []byte) []map[byte]int {
 	o := make([]map[byte]int, len(bwt)+1)
 	counts := make(map[byte]int)
@@ -45,9 +40,7 @@ func BuildOtable(bwt []byte) []map[byte]int {
 func FM_build(sa []int, genome string) ([]byte, map[byte]int) {
 	bwt := make([]byte, len(sa))
 	counts := make(map[byte]int)
-	C := make(map[byte]int)
 	activeSymbol := genome[len(genome)-1]
-	counter := 0
 
 	for i, v := range sa {
 		copyOfCounts := make(map[byte]int)
@@ -65,18 +58,12 @@ func FM_build(sa []int, genome string) ([]byte, map[byte]int) {
 		counts[bwt[i]] += 1
 
 		if activeSymbol != genome[v] {
-			C[genome[v]] = counter
 			activeSymbol = genome[v]
 		}
 	}
 
 	//create buckets
-	keys := getSortedKeysOfCountSlice(counts)
-	for i, v := range keys {
-		if i != 0 {
-			C[v] = counts[keys[i-1]] + C[keys[i-1]]
-		}
-	}
+	C := getSortedKeysOfCountSlice(counts)
 
 	return bwt, C
 }
@@ -124,23 +111,3 @@ func ReverseBWT(bwt []byte, C map[byte]int, O []map[byte]int) []int {
 	}
 	return rev
 }
-
-/*
-// this function just prints my stuff the parameters given. Should do the pattern matching.
-func FMIndexMatching(bwt []byte, c map[byte]int, Oslice []map[byte]int) {
-	fmt.Println("bwt")
-	fmt.Println(bwt)
-	fmt.Println("")
-	fmt.Println("bucketArray")
-	fmt.Println(c)
-	for _, v := range c {
-		print(v)
-	}
-	fmt.Println("")
-	fmt.Println("Oslice")
-	//fmt.Println(Oslice)
-	for _, v := range Oslice {
-		fmt.Println(v)
-	}
-}
-*/
