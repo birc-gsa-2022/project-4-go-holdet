@@ -19,16 +19,28 @@ Once you have implemented the `fm` program (and tested it to the best of your ab
 
 ## Preprocessing
 
-*What preprocessing data do you store in files, and how?*
+In the preprocessing file we have 3 types of entries. The first entry marked by '>' is the name of the genome. The second entry is marked by '@' and it is the last column in the burrow-wheeler matrix, bwt. After this we write each entry from the C array, which is the accumulated buckets of the suffix array. Now each new entry is written on a new line in the file and is marked by '\*', where the first symbol following '\*' marks the symbol in the suffix array this is followed by an integer value indicating the starting position of the symbol in the suffix array.
+We do not create the O table as it would still require order n time to reconstruct and it is roughly as fast to build directly from the bwt.
+
 
 ## Insights you may have had while implementing the algorithm
 
+We never really considered that preprocessing and by saving some intermediate result to a file for later use could be of benefit and faster use when read-mapping or for any other algorithms for that matter.
+
+
 ## Problems encountered if any
+We had some problems with managing which files to use and how to make the testserver agree with us. When we wrote directly to the file we got in preprocessing as os.Args[2] we would overwrite all the files used on the testserver meaning that our own program would find matches while all the reference algorithms would recieve empty files due to them being overwritten. When we made some specific file: "temp.fa" it would continously be overwritten on the testserver such that only the final test passed. The final solution was to create a new file named similar to Args[2] but just adding "zz" to the filetype (so from genome.fa we generated a new file genome.fazz) which seems a bit silly :S
 
 ## Validation
 
-*How did you validate that the preprocessing and the search algorithm works?*
+We ran the our fm algorithm and an old algorithm (from handin 2) on the some dataset with a couple of hundreds identical outputs. We then sorted the two results and compared them. 
+Then in order to find edgecases we also tested the algorithm on some smaller simple genomes/reads speically constructed.
+Finally we made our usual test where we run the algorithm on random strings from some different alphabets (DNA, AB, English) and verify that all reported matches are matches, and all other instances are not matches.
 
 ## Running time
+We have not checked the running time of our suffix array construction algorithm as it is the same as the one we used in project 3. The time measured is then expected O(n) preprocessing.
+![](figs/preprocessing_p4.png)
 
-*List experiments and results that show that both the preprocessing algorithm and the search algorithm works in the expected running time. Add figures by embedding them here, as you learned how to do in project 1.*
+We also made a benchmark where we did the preprocessing and then plotted the time it would take for the algorithm to find all matches, which is expected to be O(m) + the time it takes to locate and output the actual results O(z). We excluded the part where we print the z matches in this test to see if the search time would run linear in m.
+![](figs/search_p4.png)
+
