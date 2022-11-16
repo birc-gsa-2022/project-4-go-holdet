@@ -1,10 +1,14 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
+	"log"
 	"os"
+	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"birc.au.dk/gsa/shared"
 )
@@ -92,18 +96,6 @@ func TestVaryingAlphabets(t *testing.T) {
 	fmt.Println("a total of", matches, " matches was found in the test.")
 }
 
-/*func TestBWT(t *testing.T) {
-	genome, pattern := "mississippi$", "iss"
-
-	sa := shared.LsdRadixSort(genome)
-	bwt, c := shared.FM_build(sa, genome)
-	fmt.Println(bwt, c)
-	//shared.FMIndexMatching(bwtx, buckets, o)
-	fmt.Println("bongo")
-	shared.FM_search(bwt, c, _, pattern)
-
-}*/
-
 func TestOTable(t *testing.T) {
 	genome := `dagagagaaa$`
 	sa := shared.LsdRadixSort(genome)
@@ -125,147 +117,140 @@ func TestOTable(t *testing.T) {
 	}
 }
 
-/*
-func TestFMParser(t *testing.T) {
-
-	f, er := os.Open("data/pre.fm")
-	if er != nil {
-		panic(er)
-	}
-	pr_genomes := shared.FMParser(f)
-
-	fmt.Println(pr_genomes[0].Bwt, pr_genomes[0].C, pr_genomes[0].Name)
-
-}
-*/
-
-/*
-func Test_cmp_with_old_handin(t *testing.T) {
-	shared.SortFile("./testdata/output.txt")
-	shared.SortFile("./testdata/handin3_reference.txt")
-	if !shared.CmpFiles("./testdata/test_result.txt", "./testdata/h1_naive_results.txt") {
-		t.Errorf("files are not identical")
-	}
-}
-*/
-
-/*
-func TestMakeDataCons(t *testing.T) {
-	csvFile, err := os.Create("./testdata/construction_time.csv")
+func TestMakeDataPP(t *testing.T) {
+	csvFile, err := os.Create("./data/search_time.csv")
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
 	}
 	csvwriter := csv.NewWriter(csvFile)
-	_ = csvwriter.Write([]string{"x_size", "quadratic"})
-	num_of_n := 0
-	time_sq := 0
-	for i := 1; i < 20; i++ {
-		num_of_n += 500
-		num_of_m := 1
-		genome, _ := shared.BuildSomeFastaAndFastq(num_of_n, 0, 1, shared.English, 78)
-		parsedGenomes := shared.GeneralParserStub(genome, shared.Fasta, num_of_n*num_of_m+1)
-		//parsedReads := shared.GeneralParserStub(reads, shared.Fastq, num_of_n*num_of_m+1)
-		for i := 0; i < 5; i++ {
-			for _, gen := range parsedGenomes {
-				time_start := time.Now()
-				shared.LsdRadixSort(gen.Rec)
-				time_end := int(time.Since(time_start))
-				time_sq += time_end
-				fmt.Println("time", int((time_sq)))
-				_ = csvwriter.Write([]string{strconv.Itoa(num_of_n), strconv.Itoa(time_sq)})
-				csvwriter.Flush()
-				time_sq = 0
+	_ = csvwriter.Write([]string{"x_size", "time"})
+
+	num_of_n := 1000
+
+	//num_of_m := 0
+
+	for i := 1; i < 3; i++ {
+		num_of_n += 1000
+		genomes, _ := shared.BuildSomeFastaAndFastq(num_of_n, 0, 1, shared.English, 102)
+		parsedGenomes := shared.GeneralParserStub(genomes, shared.Fasta, 50000+1)
+		if len(parsedGenomes) != 1 {
+			t.Errorf("should only be 1.")
+		}
+
+		gen := parsedGenomes[0]
+		fmt.Println("creating sa")
+		sa := shared.LsdRadixSort(gen.Rec)
+		fmt.Println("sa created")
+
+		for i := 0; i < 10; i++ {
+			time_start := time.Now()
+
+			f, err := os.Create("./data/banko.dk")
+			if err != nil {
+				panic(err)
 			}
+			defer f.Close()
+
+			var sb strings.Builder
+			//add sentinel if missing
+			if gen.Rec[len(gen.Rec)-1] != '$' {
+				sb.WriteString(gen.Rec)
+				sb.WriteRune('$')
+				gen.Rec = sb.String()
+			}
+			bwt, c := shared.FM_build(sa, gen.Rec)
+			//write to file
+			f.WriteString(">" + gen.Name + "\n")
+			f.WriteString("@")
+			f.Write(bwt)
+			f.WriteString("\n")
+			for k, v := range c {
+				f.WriteString("*" + string(k) + fmt.Sprint(v))
+				f.WriteString("\n")
+			}
+			time_end := int(time.Since(time_start))
+			fmt.Println("time", int((time_end)))
+			_ = csvwriter.Write([]string{strconv.Itoa(num_of_n), strconv.Itoa(time_end)})
+			csvwriter.Flush()
 		}
 	}
 }
+
+/*
 func TestMakeDataSearch(t *testing.T) {
-	csvFile, err := os.Create("./testdata/search_time.csv")
+	csvFile, err := os.Create("./data/search_time_2.csv")
 	if err != nil {
 		log.Fatalf("failed creating file: %s", err)
 	}
 	csvwriter := csv.NewWriter(csvFile)
-	_ = csvwriter.Write([]string{"x_size", "quadratic"})
-	//num_of_n := 4000
-	num_of_m := 0
-	time_sq := 0
-	//always use the same genome in order to make the sa process go faster.
-	genomes, _ := shared.BuildSomeFastaAndFastq(50000, 0, 1, shared.A, 102)
+	_ = csvwriter.Write([]string{"x_size", "time"})
+
+	num_of_n := 30000
+
+	//num_of_m := 0
+
+	genomes, _ := shared.BuildSomeFastaAndFastq(num_of_n, 0, 1, shared.A, int64(num_of_n)+2)
 	parsedGenomes := shared.GeneralParserStub(genomes, shared.Fasta, 50000+1)
-	if len(parsedGenomes) != 1 {
-		t.Errorf("should only be 1.")
-	}
 	gen := parsedGenomes[0]
 	fmt.Println("creating sa")
 	sa := shared.LsdRadixSort(gen.Rec)
 	fmt.Println("sa created")
-	for i := 1; i < 100; i++ {
-		//num_of_n += 500
-		num_of_m += 500
-		_, reads := shared.BuildSomeFastaAndFastq(50000, num_of_m, 1, shared.A, 102)
-		parsedReads := shared.GeneralParserStub(reads, shared.Fastq, 40000*num_of_m+1)
-		for i := 0; i < 5; i++ {
-			for _, read := range parsedReads {
-				time_start := time.Now()
-				shared.BinarySearch(gen.Rec, read.Rec, sa)
-				time_end := int(time.Since(time_start))
-				time_sq += time_end
-			}
-			fmt.Println("time", int((time_sq)))
-			_ = csvwriter.Write([]string{strconv.Itoa(num_of_m), strconv.Itoa(time_sq)})
-			csvwriter.Flush()
-			time_sq = 0
-		}
-	}
-}
-*/
-/*
-func TestMakeDataOneMore(t *testing.T) {
-	csvFile, err := os.Create("./testdata/search_time.csv")
+
+	f, err := os.Create("./data/banko.dk")
 	if err != nil {
-		log.Fatalf("failed creating file: %s", err)
+		panic(err)
 	}
-	csvwriter := csv.NewWriter(csvFile)
-	_ = csvwriter.Write([]string{"x_size", "fixed_log", "fixed_log2"})
+	defer f.Close()
+
+	var sb strings.Builder
+	//add sentinel if missing
+	if gen.Rec[len(gen.Rec)-1] != '$' {
+		sb.WriteString(gen.Rec)
+		sb.WriteRune('$')
+		gen.Rec = sb.String()
+	}
+	bwt, c := shared.FM_build(sa, gen.Rec)
+	//write to file
+	f.WriteString(">" + gen.Name + "\n")
+	f.WriteString("@")
+	f.Write(bwt)
+	f.WriteString("\n")
+	for k, v := range c {
+		f.WriteString("*" + string(k) + fmt.Sprint(v))
+		f.WriteString("\n")
+	}
+
+	f, err = os.Open("./data/banko.dk")
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	p_genome := shared.FMParser(f)
+
+	gen_unp := p_genome[0]
+	//find the original genome
+	gen_unp.BS = shared.ReverseBWT(gen_unp.Bwt, gen_unp.C, gen_unp.O)
+
 	num_of_m := 0
-	num_of_n := 50000
-	time_sq, time_sq2 := 0, 0
-	genome, _ := shared.BuildSomeFastaAndFastq(num_of_n, 500, 1, shared.A, 78)
-	parsedGenomes := shared.GeneralParserStub(genome, shared.Fasta, num_of_n+1)
-	gen := parsedGenomes[0].Rec
-	sa := shared.LsdRadixSort(gen)
-	for i := 1; i < 51; i++ {
-		num_of_m += 500
-		_, reads := shared.BuildSomeFastaAndFastq(num_of_m, num_of_m, 1, shared.A, 78)
-		var sb strings.Builder
-		sb.WriteString(reads[:len(reads)-1])
-		sb.WriteRune('b')
-		reads = sb.String()
-		sb.Reset()
-		_, reads2 := shared.BuildSomeFastaAndFastq(num_of_m/2, num_of_m/2, 1, shared.A, 78)
-		sb.WriteString(reads2[:len(reads2)-1])
-		sb.WriteRune('b')
-		reads2 = sb.String()
-		sb.Reset()
-		parsedReads := shared.GeneralParserStub(reads, shared.Fastq, num_of_n*num_of_m+1)
-		parsedReads2 := shared.GeneralParserStub(reads2, shared.Fastq, num_of_n*num_of_m+1)
-		for i := 0; i < 5; i++ {
-			for _, read := range parsedReads {
-				time_start := time.Now()
-				shared.BinarySearch(gen, read.Rec, sa)
-				time_end := int(time.Since(time_start))
-				time_sq += time_end
-			}
-			for _, read := range parsedReads2 {
-				time_start := time.Now()
-				shared.BinarySearch(gen, read.Rec, sa)
-				time_end := int(time.Since(time_start))
-				time_sq2 += time_end
-			}
-			fmt.Println("time", int((time_sq)))
-			_ = csvwriter.Write([]string{strconv.Itoa(num_of_m), strconv.Itoa(time_sq), strconv.Itoa(time_sq2)})
+
+	for i := 1; i < 4; i++ {
+		num_of_m += 1000
+		_, reads := shared.BuildSomeFastaAndFastq(num_of_m+2, num_of_m, 1, shared.A, int64(num_of_m)*2+5)
+
+		parsedRead := shared.GeneralParserStub(reads, shared.Fastq, 50000+1)
+		read := parsedRead[0]
+
+		if len(parsedGenomes) != 1 {
+			t.Errorf("should only be 1.")
+		}
+
+		for i := 0; i < 10; i++ {
+			time_start := time.Now()
+			_, _ = shared.FM_search(gen_unp.Bwt, gen_unp.C, gen_unp.O, read.Rec)
+			time_end := int(time.Since(time_start))
+			fmt.Println("time", int((time_end)))
+			_ = csvwriter.Write([]string{strconv.Itoa(num_of_m), strconv.Itoa(time_end)})
 			csvwriter.Flush()
-			time_sq, time_sq2 = 0, 0
 		}
 	}
 }
