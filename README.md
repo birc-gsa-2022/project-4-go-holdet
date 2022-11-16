@@ -19,7 +19,7 @@ Once you have implemented the `fm` program (and tested it to the best of your ab
 
 ## Preprocessing
 
-In the preprocessing file we have 3 types of entries. The first entry marked by '>' is the name of the genome. The second entry is marked by '@' and it is the last column in the burrow-wheeler matrix, bwt. After this we write each entry from the c array, which is the accumulated buckets of the suffix array. Each new entry is written on a new line in the file and is marked by '*', where the first symbol following '*' marks the symbol in the suffix array this is followed by an integer value indicating the starting position of the symbol in the suffix array.
+In the preprocessing file we have 3 types of entries. The first entry marked by '>' is the name of the genome. The second entry is marked by '@' and it is the last column in the burrow-wheeler matrix, bwt. After this we write each entry from the c array, which is the accumulated buckets of the suffix array. Each new entry is written on a new line in the file and is marked by '\*', where the first symbol following '\*' marks the symbol in the suffix array this is followed by an integer value indicating the starting position of the symbol in the suffix array.
 
 
 ## Insights you may have had while implementing the algorithm
